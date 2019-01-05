@@ -1,28 +1,72 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import {BrowserRouter as Router,Route,Redirect,Link,Switch} from 'react-router-dom'
+
+import Home from './Components/Home/Home';
+import Timetable from './Components/Timetable/Timetable';
+import Register from './Components/Register/Register';
+import Signin from './Components/Signin/Signin';
 import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
+
+const PrivateRoute = ({render: Component, ...rest})=>(
+
+ <Route {...rest} render = {(props)=>(
+
+  authentication.isAuthenticated ===true? <Component {...props}/> : <Redirect to ='/signin'/>
+
+)} />
+
+)
+
+const authentication = {
+
+  isAuthenticated: false,
+
+  authenticate(token,cb) {
+    this.isAuthenticated = true
+  sessionStorage.setItem('token',token)
+    setTimeout(cb,100)
+
+  },
+  signout(cb){
+    this.isAuthenticated = false
+   sessionStorage.removeItem('token')
+    setTimeout(cb,100)
   }
+}
+
+
+class App extends Component
+{
+
+
+
+    render() {
+      return (
+
+       <Router>
+       <div>
+       <Route path ='/register' render = {()=>{
+       return (<Register authentication = {authentication} />)
+        }} />
+        <Route path = 'signin' render = {()=>{
+
+          return (<Signin authentication = {authentication}/>)
+        }}/>
+
+       <PrivateRoute path ='/home' render={()=>{
+        return (<Home authentication = {authentication}/>)
+       }
+       }/>
+       <PrivateRoute path = '/timetable' render = {()=>{
+         return (<Timetable/>)
+       }}/>
+
+
+     </div>
+     </Router>
+           );
+          }
 }
 
 export default App;
